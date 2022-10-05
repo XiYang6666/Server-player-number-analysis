@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>今日服务器在线人数</title>
+
+    <script src="chart.min.js"></script>
+    <script src="jquery-3.6.1.min.js"></script>
+
+</head>
+<body>
+    <!-- 不会写前端 将就着用吧 -->
+    <canvas id="chart"></canvas>
+    <script>
+        var data = undefined
+        end_time = new Date().getTime()
+        $.ajax(
+            {
+                "type": "GET",
+                "url": `get_data?start_time=${(end_time-(60*60*1000))/1000}&end_time=${end_time/1000}`,
+                "success": function(result){
+                    data = result
+                },
+                "async":false
+            }
+        )
+
+        labels_data = []
+        for(var i=0;i<60;i++){
+            labels_data.push(`${i}分钟前`)
+        }
+
+        var chart_data = []
+        for(j=0;j<60;j++){
+            temp = []
+            for(var i of data){
+                if(i.start_time <= (end_time/1000 - j*60) & (end_time/1000 - j*60) < i.end_time){
+                    temp.push(i.count)
+                }
+            }
+            if(temp.length == 0){
+                chart_data.push(undefined)
+            }
+            else{
+                chart_data.push(Math.max(temp))
+            }
+        }
+
+        chart_data = {
+            type: "line",
+            data:{
+                labels: labels_data,
+                datasets: [
+                    {
+                        label: "在线人数",
+                        data: chart_data,
+                        fill: false,
+                        borderColor: '#1e90ff',
+                        tension: 0.1
+                    }
+                ]
+            }
+
+        }
+
+        window.addEventListener("load", function(e){
+            var chart_element = document.getElementById("chart")
+            chart = new Chart(chart_element, chart_data)
+        })
+    </script>
+</body>
+</html>

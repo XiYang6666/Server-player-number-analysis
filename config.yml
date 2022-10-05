@@ -1,0 +1,37 @@
+# http服务器配置
+server:
+  host: "0.0.0.0"
+  port: 2333
+
+
+# 被检测的服务器
+detected_server:
+  host: "mc.kanfeidie.com"
+  port: 19132
+
+
+# 邮箱配置
+# 到达指定数量玩家时发邮件提醒
+email:
+  # 是否启用
+  enable: true
+  # 到达多少人时发送邮件
+  target: 2
+  # 发邮件的smtp服务器配置
+  smtp:
+    # smtp服务器地址
+    host: "smtp.163.com"
+    # smtp服务器端口
+    port: 25
+    # smtp登录用户名
+    user_name: ""
+    # smtp密码
+    password: ""
+  # 用户名(随便起) 用于显示发送的邮件的From部分
+  name: "Player Number Analysis"
+  # 邮箱 用于显示发送的邮件的From部分
+  email: "xxxxxxxxxx@xxx.xxx"
+  # 接收邮件的邮箱列表
+  receivers:
+    - "xxxxxxxxxx@xx.xxx"
+
