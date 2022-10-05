@@ -274,7 +274,6 @@ with open("config.yml", "r", encoding="utf-8") as f:
 app = FastAPI()
 getServerData = GetServerData((config["detected_server"]["host"], config["detected_server"]["port"]))
 timer = Timer(1)
-# 测试完改成60!测试完改成60!测试完改成60!测试完改成60!测试完改成60!测试完改成60!测试完改成60!测试完改成60!测试完改成60!
 is_send_email = True
 def func():
     global is_send_email
@@ -287,7 +286,7 @@ def func():
         is_send_email = True
 
 
-timer.SetInterval(func,10)
+timer.SetInterval(func,60)
 mail = Email(
     (config["email"]["smtp"]["host"], config["email"]["smtp"]["port"]),
     config["email"]["smtp"]["user_name"],
