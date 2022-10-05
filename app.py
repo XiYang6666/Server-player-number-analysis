@@ -254,6 +254,8 @@ class GetServerData:
                 FROM quantity
                 WHERE start_time >= :start_time
                     AND start_time <= :end_time
+                    OR end_time >= :start_time
+                    AND end_time <= :end_time
                 """ ,{"start_time": start_time, "end_time": end_time}
             )
             data = self.db_cursor.fetchall()
