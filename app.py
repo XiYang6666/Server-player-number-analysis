@@ -160,6 +160,23 @@ class GetServerData:
                 """
             )
 
+            # 开始时创建一条占位纪录 防止直接更改上次运行时的记录
+            self.db_cursor.execute(
+                """
+                INSERT INTO quantity(
+                        start_time,
+                        end_time,
+                        count
+                    )
+                VALUES (
+                        :time,
+                        :time,
+                        -1
+                    )
+                """, {"time": time.time()}
+            )
+
+
     def get_data(self) -> dict | bool:
         """
         获取服务器数据
@@ -201,10 +218,14 @@ class GetServerData:
         # 获取一次数据
         data = self.get_data()
         now_time = time.time()
-        if not data:
-            logging.warning("因为无法获取服务器数据 所以未能记录数据")
-            return
+        player_number = data["players"]["online"]
+
         with self.db_connection:
+            if not data:
+                logging.warning("因为无法获取服务器数据 所以未能记录数据")
+                # 插入值为-1的数据占位
+                player_number = -1
+
             self.db_cursor.execute(
                 """
                 SELECT max(start_time),
@@ -220,7 +241,7 @@ class GetServerData:
                     WHERE start_time=:start_time
                     """, {"start_time":db_data[0][0],"end_time": now_time}
                 )
-            if db_data[0][1] == data["players"]["online"]:
+            if db_data[0][1] == player_number:
                 # 用户数相同 只更新最新的一条记录的end_time
                 pass
             else:
@@ -237,7 +258,7 @@ class GetServerData:
                             :time,
                             :count
                         )
-                    """, {"time": now_time, "count": data["players"]["online"]}
+                    """, {"time": now_time, "count": player_number}
                 )
 
         return data
@@ -252,15 +273,16 @@ class GetServerData:
                 """
                 SELECT *
                 FROM quantity
-                WHERE start_time >= :start_time
-                    AND start_time <= :end_time
-                    OR end_time >= :start_time
-                    AND end_time <= :end_time
+                WHERE (start_time >= :start_time AND start_time <= :end_time)
+                    OR (end_time >= :start_time AND end_time <= :end_time)
                 """ ,{"start_time": start_time, "end_time": end_time}
             )
             data = self.db_cursor.fetchall()
             ls = []
             for i in data:
+                if i[2] < 0:
+                    # 不返回值为-1的占位记录
+                    continue
                 ls.append({
                     "start_time": i[0],
                     "end_time": i[1],
@@ -275,6 +297,7 @@ app = FastAPI()
 getServerData = GetServerData((config["detected_server"]["host"], config["detected_server"]["port"]))
 timer = Timer(1)
 is_send_email = True
+
 def func():
     global is_send_email
     data = getServerData.record()
