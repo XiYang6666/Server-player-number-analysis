@@ -77,7 +77,7 @@ class Email:
         email_data["To"] = email.utils.formataddr((None, receivers[0]))
         email_data["Subject"] = subject
 
-        return self.send_mail(email_data.as_string(), [receivers])
+        return self.send_mail(email_data.as_string(), receivers)
 
 
 class Timer(threading.Thread):
