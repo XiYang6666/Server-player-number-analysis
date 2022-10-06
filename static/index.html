@@ -12,14 +12,17 @@
 </head>
 <body>
     <!-- 不会写前端 将就着用吧 -->
+    <span id="now_time"></span><br/>
+    <span>获取最新数据请刷新网页</span>
     <canvas id="chart"></canvas>
     <script>
         var data = undefined
-        end_time = new Date().getTime()
+        var now_time = new Date().getTime()/1000
+        document.getElementById("now_time").innerText =  `请求此网页的时间: ${new Date()}`
         $.ajax(
             {
                 "type": "GET",
-                "url": `get_data?start_time=${(end_time-(60*60*1000))/1000}&end_time=${end_time/1000}`,
+                "url": `get_data?start_time=${now_time-(60*60)}&end_time=${now_time}`,
                 "success": function(result){
                     data = result
                 },
@@ -27,25 +30,36 @@
             }
         )
 
-        labels_data = []
+        var labels_data = []
         for(var i=0;i<60;i++){
             labels_data.push(`${i}分钟前`)
         }
+        labels_data[0]= "不到1分钟"
 
         var chart_data = []
         for(j=0;j<60;j++){
-            temp = []
+            var start_time = now_time - j*60 - 60
+            var end_time = now_time - j*60
+            var temp = undefined
+            var temp_time = 0
             for(var i of data){
-                if(i.start_time <= (end_time/1000 - j*60) & (end_time/1000 - j*60) < i.end_time){
-                    temp.push(i.count)
+                if(
+                    (i.end_time > start_time & start_time >= i.start_time) ||
+                    (i.end_time > end_time   & end_time   >= i.start_time) ||
+
+                    (end_time > i.end_time   & i.end_time   >= start_time) ||
+                    (end_time > i.start_time & i.start_time >= start_time)
+
+                ){
+                    console.log("==")
+                    if(i.start_time>temp_time){
+                        temp = i.count
+                        temp_time = i.start_time
+                    }
                 }
             }
-            if(temp.length == 0){
-                chart_data.push(undefined)
-            }
-            else{
-                chart_data.push(Math.max(temp))
-            }
+            chart_data.push(temp)
+            
         }
 
         chart_data = {
