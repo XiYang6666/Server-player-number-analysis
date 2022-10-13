@@ -218,13 +218,14 @@ class GetServerData:
         # 获取一次数据
         data = self.get_data()
         now_time = time.time()
-        player_number = data["players"]["online"]
 
         with self.db_connection:
             if not data:
                 logging.warning("因为无法获取服务器数据 所以未能记录数据")
                 # 插入值为-1的数据占位
                 player_number = -1
+            else:
+                player_number = data["players"]["online"]
 
             self.db_cursor.execute(
                 """
