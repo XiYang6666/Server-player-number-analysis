@@ -177,7 +177,7 @@ class GetServerData:
             )
 
 
-    def get_data(self) -> dict | bool:
+    def get_data(self) -> dict:
         """
         获取服务器数据
         """
@@ -209,7 +209,7 @@ class GetServerData:
             return data
         except:
             logging.warning("获取服务器数据失败")
-            return False
+            return {}
 
     def record(self):
         """
@@ -302,6 +302,8 @@ is_send_email = True
 def func():
     global is_send_email
     data = getServerData.record()
+    if not data:
+        return
     if data["players"]["online"] >= config["email"]["target"]:
         if is_send_email and config["email"]["enable"]:
             mail.send_html_file("email.html", config["email"]["receivers"], f"服务器人数达到 {data['players']['online']}人")
